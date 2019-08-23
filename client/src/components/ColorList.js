@@ -7,9 +7,10 @@ const initialColor = {
 }
 
 const ColorList = ({ colors, updateColors }) => {
-  console.log(colors)
+  
   const [editing, setEditing] = useState(false)
   const [colorToEdit, setColorToEdit] = useState(initialColor)
+  const [colorToAdd, setColorToAdd] = useState(initialColor)
 
   const editColor = color => {
     setEditing(true)
@@ -37,9 +38,19 @@ const ColorList = ({ colors, updateColors }) => {
     axiosWithAuth()
       .delete(`http://localhost:5000/api/colors/${color.id}`)
       .then(res => {
-        updateColors(colors.filter(colorCheck => colorCheck.id !== res.data)) //checking against color.id also works
+        updateColors(colors.filter(colorCheck => colorCheck.id !== res.data))
       })
       .catch(err => console.log(err))
+  }
+
+  const addColor = () => {
+    axiosWithAuth()
+    .post(`http://localhost:5000/api/colors`, colorToAdd)
+    .then(res => {
+      updateColors(res.data)
+      setColorToAdd(initialColor)
+    })
+    .catch(err => console.log(err))
   }
 
   return (
@@ -94,8 +105,40 @@ const ColorList = ({ colors, updateColors }) => {
         </form>
       )}
 
-      <div className="spacer" />
-      {/* stretch - build another form here to add a color */}
+      {/* <div className="spacer" /> */}
+
+      <form>
+        <legend>add color</legend>
+        
+        <label>
+          color name:
+          <input
+            type='text'
+            name='color'
+            onChange={event => 
+              setColorToAdd({ ...colorToAdd, color: event.target.value })
+            }
+            placeholder='color name'
+            value={colorToAdd.color}
+          />
+        </label>
+
+        <label>
+          hex code:
+          <input
+            type='text'
+            name='hex'
+            onChange={event => 
+              setColorToAdd({ ...colorToAdd, code: { hex: event.target.value }})}
+            placeholder="hex code"
+            value={colorToAdd.code.hex}
+          />
+        </label>
+
+        <div className="button-row">
+          <button type='button' onClick={() => addColor()}>submit</button>
+        </div>
+      </form>
     </div>
   )
 }
